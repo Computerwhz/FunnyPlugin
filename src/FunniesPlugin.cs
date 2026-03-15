@@ -11,6 +11,7 @@ public class FunniesConfig : BasePluginConfig
     [JsonPropertyName("ColorR")] public byte R { get; set; } = 171;
     [JsonPropertyName("ColorG")] public byte G { get; set; } = 75;
     [JsonPropertyName("ColorB")] public byte B { get; set; } = 209;
+    [JsonPropertyName("DoNotTransmitWeapons")] public bool doNotTransmitWeapons { get; set; } = false;
     [JsonPropertyName("CommandPermission")] public string AdminPermission { get; set; } = "@css/generic";
 }
  

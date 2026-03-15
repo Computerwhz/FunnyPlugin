@@ -9,7 +9,6 @@ namespace Funnies.Modules;
 
 public class Invisible
 {
-
     private static List<CEntityInstance> _entities = [];
 
     public static void OnPlayerTransmit(CCheckTransmitInfo info, CCSPlayerController player)
@@ -23,11 +22,14 @@ public class Invisible
                 info.TransmitEntities.Remove(entity);
         }
 
-        if (Globals.InvisiblePlayers.ContainsKey(player))
+        if (Globals.Config.doNotTransmitWeapons)
         {
-            foreach (var weapon in player!.PlayerPawn.Value.WeaponServices.MyWeapons)
+            if (Globals.InvisiblePlayers.ContainsKey(player))
             {
-                info.TransmitEntities.Remove(weapon);
+                foreach (var weapon in player!.PlayerPawn.Value.WeaponServices.MyWeapons)
+                {
+                    info.TransmitEntities.Remove(weapon);
+                }
             }
         }
         

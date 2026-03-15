@@ -1,6 +1,8 @@
+using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Admin;
 using CounterStrikeSharp.API.Modules.Commands;
+using CounterStrikeSharp.API.Modules.Utils;
 
 namespace Funnies.Commands;
 
@@ -10,12 +12,43 @@ public class CommandWallhack
     {
         if (!AdminManager.PlayerHasPermissions(caller, Globals.Config.AdminPermission)) return;
         
-        var player = Util.GetPlayerByName(command.ArgString);
+        if (command.ArgString == "@ct")
+        {
+            foreach (CCSPlayerController player in Utilities.GetPlayers())
+            {
+                if (player.Team == CsTeam.CounterTerrorist)
+                {
+                    SetWallhack(player,  caller, command);
+                    return;
+                }
+            }
+        }
+        else if (command.ArgString == "@t")
+        {
+            foreach (CCSPlayerController player in Utilities.GetPlayers())
+            {
+                if (player.Team == CsTeam.Terrorist)
+                {
+                    SetWallhack(player,  caller, command);
+                    return;
+                }
+            }
+        }
+        else
+        {
+            CCSPlayerController player = Util.GetPlayerByName(command.ArgString);
+            SetWallhack(player,  caller, command);
+        }
 
+        
+    }
+
+    public static void SetWallhack(CCSPlayerController? player, CCSPlayerController caller, CommandInfo command)
+    {
         if (player != null)
         {
             if (Util.IsPlayerValid(caller))
-                Util.ServerPrintToChat(caller!, $"Toggled wallhacks on {command.ArgString}");
+                Util.ServerPrintToChat(caller!, $"Toggled wallhacks on {player.PlayerName}");
 
             if (!Globals.Wallhackers.Remove(player))
                 Globals.Wallhackers.Add(player);
