@@ -23,6 +23,14 @@ public class Invisible
                 info.TransmitEntities.Remove(entity);
         }
 
+        if (Globals.InvisiblePlayers.ContainsKey(player))
+        {
+            foreach (var weapon in player!.PlayerPawn.Value.WeaponServices.MyWeapons)
+            {
+                info.TransmitEntities.Remove(weapon);
+            }
+        }
+        
         if (gameRules.GameRules!.WarmupPeriod) return;
 
         var c4s = Utilities.FindAllEntitiesByDesignerName<CC4>("weapon_c4");
