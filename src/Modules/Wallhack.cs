@@ -1,7 +1,6 @@
 using System.Drawing;
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
-using CounterStrikeSharp.API.Core.Attributes.Registration;
 using CounterStrikeSharp.API.Modules.Utils;
 using Funnies.Commands;
 
@@ -24,7 +23,7 @@ public class Wallhack
                     continue;
                 }
             }
-
+            
             info.TransmitEntities.Remove(entity.Value.ModelRelay);
             info.TransmitEntities.Remove(entity.Value.GlowEnt);
         }
@@ -39,7 +38,7 @@ public class Wallhack
         // if (gameRules.GameRules!.WarmupPeriod) return HookResult.Continue;
 
         
-        Glow(player!);
+        CreateWallhackData(player!);
         
         return HookResult.Continue;
     }
@@ -50,12 +49,8 @@ public class Wallhack
         if (!Util.IsPlayerValid(player)) return HookResult.Continue;
         if (!Globals.WallhackData.TryGetValue(player!, out var glowData)) return HookResult.Continue;
 
-        if (glowData.GlowEnt.IsValid)
-            glowData.GlowEnt.Remove();
-        if (glowData.ModelRelay.IsValid)
-            glowData.ModelRelay.Remove();
-
-        Globals.WallhackData.Remove(player!);
+        RemoveWallhackData(player);
+        
         Globals.Wallhackers.Remove(player!);
 
         return HookResult.Continue;
@@ -71,6 +66,8 @@ public class Wallhack
         glowData.GlowEnt.Glow.GlowRange = 0;
         glowData.GlowEnt.DispatchSpawn();
 
+        RemoveWallhackData(@event.Userid);
+
         return HookResult.Continue;
     }
 
@@ -82,16 +79,12 @@ public class Wallhack
         if (!glowData.GlowEnt.IsValid) return HookResult.Continue;
         if (!glowData.ModelRelay.IsValid) return HookResult.Continue;
 
-        Server.NextWorldUpdate(() => 
-        {
-            glowData.GlowEnt.SetModel(Util.GetPlayerModel(player));
-            glowData.ModelRelay.SetModel(Util.GetPlayerModel(player));
-        });
-
+        RemoveWallhackData(player);
+        
         return HookResult.Continue;
     }
 
-    private static void Glow(CCSPlayerController player)
+    private static void CreateWallhackData(CCSPlayerController player)
     {
         var glowEntity = Utilities.CreateEntityByName<CDynamicProp>("prop_dynamic");
         var modelRelay = Utilities.CreateEntityByName<CDynamicProp>("prop_dynamic");
@@ -124,6 +117,14 @@ public class Wallhack
             GlowEnt = glowEntity,
             ModelRelay = modelRelay
         });
+    }
+
+    public static void RemoveWallhackData(CCSPlayerController player)
+    {
+        if(!Globals.WallhackData.TryGetValue(player, out var data)) return;
+        data.GlowEnt.Remove();
+        data.ModelRelay.Remove();
+        Globals.WallhackData.Remove(player);
     }
 
     public static void Setup()

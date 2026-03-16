@@ -23,7 +23,6 @@ public class Invisible
             if (entity == null || !entity.IsValid)
                 continue;
 
-            // Never hide a player's own pawn from themselves
             if (entity is CCSPlayerPawn pawn)
             {
                 var owner = pawn.Controller?.Value?.As<CCSPlayerController>();
@@ -34,7 +33,6 @@ public class Invisible
                 continue;
             }
 
-            // Never hide a player's own weapons from themselves
             if (entity is CCSWeaponBase weapon)
             {
                 var ownerPawn = weapon.OwnerEntity?.Value as CCSPlayerPawn;
@@ -47,7 +45,6 @@ public class Invisible
                 continue;
             }
 
-            // Default fallback
             info.TransmitEntities.Remove(entity);
         }
 
