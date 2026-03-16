@@ -13,26 +13,44 @@ public class Invisible
 
     public static void OnPlayerTransmit(CCheckTransmitInfo info, CCSPlayerController player)
     {
-        // TODO: Should store these but dont know a good way :/
         var gameRules = Utilities.FindAllEntitiesByDesignerName<CCSGameRulesProxy>("cs_gamerules").First();
 
         foreach (var entity in _entities)
         {
-            if (!Globals.InvisiblePlayers.ContainsKey(player) && player.Team != CsTeam.Spectator)
+            if (player.Team == CsTeam.Spectator)
+                continue;
+
+            if (entity == null || !entity.IsValid)
+                continue;
+
+            // Never hide a player's own pawn from themselves
+            if (entity is CCSPlayerPawn pawn)
+            {
+                var owner = pawn.Controller?.Value?.As<CCSPlayerController>();
+                if (owner != null && owner == player)
+                    continue;
+
                 info.TransmitEntities.Remove(entity);
+                continue;
+            }
+
+            // Never hide a player's own weapons from themselves
+            if (entity is CCSWeaponBase weapon)
+            {
+                var ownerPawn = weapon.OwnerEntity?.Value as CCSPlayerPawn;
+                var ownerController = ownerPawn?.Controller?.Value?.As<CCSPlayerController>();
+
+                if (ownerController != null && ownerController == player)
+                    continue;
+
+                info.TransmitEntities.Remove(entity);
+                continue;
+            }
+
+            // Default fallback
+            info.TransmitEntities.Remove(entity);
         }
 
-        if (Globals.Config.doNotTransmitWeapons)
-        {
-            if (Globals.InvisiblePlayers.ContainsKey(player))
-            {
-                foreach (var weapon in player!.PlayerPawn.Value.WeaponServices.MyWeapons)
-                {
-                    info.TransmitEntities.Remove(weapon);
-                }
-            }
-        }
-        
         if (gameRules.GameRules!.WarmupPeriod) return;
 
         var c4s = Utilities.FindAllEntitiesByDesignerName<CC4>("weapon_c4");
@@ -40,7 +58,7 @@ public class Invisible
         if (c4s.Any())
         {
             var c4 = c4s.First();
-            if (player!.Team != CsTeam.Terrorist && !gameRules.GameRules!.BombPlanted && !c4.IsPlantingViaUse  && !gameRules.GameRules!.BombDropped)
+            if (player.Team != CsTeam.Terrorist && !gameRules.GameRules!.BombPlanted && !c4.IsPlantingViaUse && !gameRules.GameRules!.BombDropped)
                 info.TransmitEntities.Remove(c4);
             else
                 info.TransmitEntities.Add(c4);

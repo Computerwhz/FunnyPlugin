@@ -11,7 +11,7 @@ public class Wallhack
 {
     public static void OnPlayerTransmit(CCheckTransmitInfo info, CCSPlayerController player)
     {
-        foreach (var entity in Globals.GlowData)
+        foreach (var entity in Globals.WallhackData)
         {
             if (Globals.Wallhackers.Contains(player!))
             {
@@ -29,17 +29,18 @@ public class Wallhack
             info.TransmitEntities.Remove(entity.Value.GlowEnt);
         }
     }
-
+    
     public static HookResult OnPlayerSpawn(EventPlayerSpawn @event, GameEventInfo info)
     {
         var player = @event.Userid;
         if (!Util.IsPlayerValid(player)) return HookResult.Continue;
         if (player!.Team < CsTeam.Terrorist) return HookResult.Continue; // if player isnt on a team
-        var gameRules = Utilities.FindAllEntitiesByDesignerName<CCSGameRulesProxy>("cs_gamerules").First();
-        if (gameRules.GameRules!.WarmupPeriod) return HookResult.Continue;
+        // var gameRules = Utilities.FindAllEntitiesByDesignerName<CCSGameRulesProxy>("cs_gamerules").First();
+        // if (gameRules.GameRules!.WarmupPeriod) return HookResult.Continue;
 
+        
         Glow(player!);
-
+        
         return HookResult.Continue;
     }
 
@@ -47,14 +48,14 @@ public class Wallhack
     {
         var player = @event.Userid;
         if (!Util.IsPlayerValid(player)) return HookResult.Continue;
-        if (!Globals.GlowData.TryGetValue(player!, out var glowData)) return HookResult.Continue;
+        if (!Globals.WallhackData.TryGetValue(player!, out var glowData)) return HookResult.Continue;
 
         if (glowData.GlowEnt.IsValid)
             glowData.GlowEnt.Remove();
         if (glowData.ModelRelay.IsValid)
             glowData.ModelRelay.Remove();
 
-        Globals.GlowData.Remove(player!);
+        Globals.WallhackData.Remove(player!);
         Globals.Wallhackers.Remove(player!);
 
         return HookResult.Continue;
@@ -64,7 +65,7 @@ public class Wallhack
     {
         var player = @event.Userid;
         if (!Util.IsPlayerValid(player)) return HookResult.Continue;
-        if (!Globals.GlowData.TryGetValue(player!, out var glowData)) return HookResult.Continue;
+        if (!Globals.WallhackData.TryGetValue(player!, out var glowData)) return HookResult.Continue;
         if (!glowData.GlowEnt.IsValid) return HookResult.Continue;
 
         glowData.GlowEnt.Glow.GlowRange = 0;
@@ -77,7 +78,7 @@ public class Wallhack
     {
         var player = @event.Userid;
         if (!Util.IsPlayerValid(player)) return HookResult.Continue;
-        if (!Globals.GlowData.TryGetValue(player!, out var glowData)) return HookResult.Continue;
+        if (!Globals.WallhackData.TryGetValue(player!, out var glowData)) return HookResult.Continue;
         if (!glowData.GlowEnt.IsValid) return HookResult.Continue;
         if (!glowData.ModelRelay.IsValid) return HookResult.Continue;
 
@@ -111,15 +112,15 @@ public class Wallhack
 
         glowEntity.Glow.GlowRange = 5000;
         glowEntity.Glow.GlowRangeMin = 0;
-        glowEntity.Glow.GlowColorOverride = Color.FromArgb(255, Globals.Config.R, Globals.Config.G, Globals.Config.B);
+        glowEntity.Glow.GlowColorOverride = Color.FromArgb(255, Globals.Config.WallHackConfig.R, Globals.Config.WallHackConfig.G, Globals.Config.WallHackConfig.B);
         glowEntity.Glow.GlowTeam = -1;
         glowEntity.Glow.GlowType = 3;
 
         modelRelay.AcceptInput("FollowEntity", player.Pawn.Value, null, "!activator");
         glowEntity.AcceptInput("FollowEntity", modelRelay, null, "!activator");
 
-        Globals.GlowData.Remove(player);
-        Globals.GlowData.Add(player, new() {
+        Globals.WallhackData.Remove(player);
+        Globals.WallhackData.Add(player, new() {
             GlowEnt = glowEntity,
             ModelRelay = modelRelay
         });
@@ -138,7 +139,7 @@ public class Wallhack
 
     public static void Cleanup()
     {
-        foreach (var entity in Globals.GlowData)
+        foreach (var entity in Globals.WallhackData)
         {
             Server.NextWorldUpdate(() => 
             {
@@ -147,7 +148,7 @@ public class Wallhack
             });
         }
 
-        Globals.GlowData.Clear();
+        Globals.WallhackData.Clear();
         Globals.Wallhackers.Clear();
     }
 }

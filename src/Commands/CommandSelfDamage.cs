@@ -1,3 +1,4 @@
+﻿using System.Drawing;
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Admin;
@@ -6,9 +7,9 @@ using CounterStrikeSharp.API.Modules.Utils;
 
 namespace Funnies.Commands;
 
-public class CommandWallhack
+public class CommandSelfDamage
 {
-    public static void OnWallhackCommand(CCSPlayerController? caller, CommandInfo command)
+    public static void OnSelfDamageCommand(CCSPlayerController? caller, CommandInfo command)
     {
         if (!AdminManager.PlayerHasPermissions(caller, Globals.Config.AdminPermission)) return;
         
@@ -18,7 +19,7 @@ public class CommandWallhack
             {
                 if (player.Team == CsTeam.CounterTerrorist)
                 {
-                    SetWallhack(player,  caller, command);
+                    SetSelfDamage(player,  caller, command);
                     return;
                 }
             }
@@ -29,7 +30,7 @@ public class CommandWallhack
             {
                 if (player.Team == CsTeam.Terrorist)
                 {
-                    SetWallhack(player,  caller, command);
+                    SetSelfDamage(player,  caller, command);
                     return;
                 }
             }
@@ -37,21 +38,21 @@ public class CommandWallhack
         else
         {
             CCSPlayerController player = Util.GetPlayerByName(command.ArgString);
-            SetWallhack(player,  caller, command);
+            SetSelfDamage(player,  caller, command);
         }
 
         
     }
 
-    private static void SetWallhack(CCSPlayerController? player, CCSPlayerController caller, CommandInfo command)
+    private static void SetSelfDamage(CCSPlayerController? player, CCSPlayerController caller, CommandInfo command)
     {
         if (player != null)
         {
             if (Util.IsPlayerValid(caller))
-                Util.ServerPrintToChat(caller!, $"Toggled wallhacks on {player.PlayerName}");
+                Util.ServerPrintToChat(caller!, $"Toggled Self Damage on {player.PlayerName}");
 
-            if (!Globals.Wallhackers.Remove(player))
-                Globals.Wallhackers.Add(player);
+            if (!Globals.selfDamagePlayers.Remove(player))
+                Globals.selfDamagePlayers.Add(player);
         }
         else
         {

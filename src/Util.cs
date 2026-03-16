@@ -39,7 +39,7 @@ public static class Util
 
     public static void ServerPrintToChat(CCSPlayerController player, string message)
     {
-        player.PrintToChat($" {ChatColors.Green}[SERVER]{ChatColors.White} {message}");
+        player.PrintToChat($" {ChatColors.White}[{ChatColors.Green}SERVER{ChatColors.White}] {message}");
     }
 
     public static List<CGameSceneNode> GetChildrenRecursive(CGameSceneNode gameSceneNode)
